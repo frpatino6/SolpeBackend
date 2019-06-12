@@ -20,4 +20,22 @@ namespace RCN.Solpe.DataBase.Core.ViewModels
 
     public string status { get; set; }
   }
+
+  public class NotificationModel {
+    public List<string> registration_ids { get; set; }
+    public Notification notification { get; set; }
+
+    public string image { get; set; }
+    public string sound { get; set; }
+
+  }
+
+  public class Notification {
+    public string tittle { get; set; }
+    public string text { get; set; }
+    public int badge { get; set; }
+    public string category { get; set; }
+    public bool showWhenInForeground { get; set; }
+
+  }
 }

@@ -28,10 +28,18 @@
     /// </summary>
     private void InitializeComponent()
     {
-      components = new System.ComponentModel.Container();
+      this.solpeEventLog = new System.Diagnostics.EventLog();
+      ((System.ComponentModel.ISupportInitialize)(this.solpeEventLog)).BeginInit();
+      // 
+      // SolpeService
+      // 
       this.ServiceName = "Service1";
+      ((System.ComponentModel.ISupportInitialize)(this.solpeEventLog)).EndInit();
+
     }
 
     #endregion
+
+    private System.Diagnostics.EventLog solpeEventLog;
   }
 }

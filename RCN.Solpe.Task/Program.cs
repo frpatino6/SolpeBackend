@@ -14,6 +14,14 @@ namespace RCN.Solpe.Task
     /// </summary>
     static void Main()
     {
+      //if (Environment.UserInteractive)
+      //{
+      //  SolpeService service1 = new SolpeService();
+      //  service1.startConsole();
+      //  Console.ReadLine();
+
+      //}
+
       ServiceBase[] ServicesToRun;
       ServicesToRun = new ServiceBase[]
       {

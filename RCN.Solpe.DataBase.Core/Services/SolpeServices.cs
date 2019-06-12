@@ -31,11 +31,11 @@ namespace RCN.Solpe.DataBase.Core.Services
     {
       string conString = GetOracleConnectionParameters();
       int result = 0;
-
+      string sourceToken = accessToken;
 
       if (!platform.Equals("android"))
         accessToken = GenerateIosAccessToken(accessToken);
-      
+
 
       Zsd_Solpe_Access_Users _zsd_Solpe_Access_Users = null;
       using (OracleConnection con = new OracleConnection(conString))
@@ -78,7 +78,7 @@ namespace RCN.Solpe.DataBase.Core.Services
           if (_zsd_Solpe_Access_Users != null && accessToken != _zsd_Solpe_Access_Users.AccessToken) //Valida si el usuario tiene el mismo accessToken que el enviado por el dispositivo
             result = await SetAccessToken(userName, accessToken, platform); //si no es el mismo, actualiza el accessToken en la base de datos
           else if (_zsd_Solpe_Access_Users == null)//Si no se encontro el access token del usuario, se procede a registrar el usuario con su accessToken y plataforma 
-            result = CreateSolpeAccessUser(userName, platform, accessToken);
+            result = CreateSolpeAccessUser(userName, platform, accessToken, sourceToken);
 
           reader.Dispose();
         }
@@ -88,7 +88,13 @@ namespace RCN.Solpe.DataBase.Core.Services
       return _zsd_Solpe_Access_Users;
     }
 
-    public async Task<List<ZsdLiberaSolpe>> GetLiberaSolpes(string userName)
+
+    /// <summary>
+    /// Return solpes by user
+    /// </summary>
+    /// <param name="userName"></param>
+    /// <returns></returns>
+    public async Task<List<ZsdLiberaSolpe>> GetLiberaSolpes(string userName = "")
     {
       string conString = GetOracleConnectionParameters();
 
@@ -111,26 +117,37 @@ namespace RCN.Solpe.DataBase.Core.Services
           if (!string.IsNullOrEmpty(userName))
             cmd.CommandText = "select * from ZSD_LIBERA_SOLPE  where usuario=:nombre and estado!='E'";
           else
-            cmd.CommandText = "select * from ZSD_LIBERA_SOLPE  where  and estado!='E'";
+            cmd.CommandText = @"select s.usuario,u.access_token  from zsd_libera_solpe s
+                                inner join zsd_solpe_access_users u on s.usuario=u.username
+                                where   s.estado IS NULL
+                                group by s.usuario,u.access_token";
 
           OracleDataReader reader = cmd.ExecuteReader();
 
+          if (!string.IsNullOrEmpty(userName))
+            while (reader.Read())
+            {
+              ZsdLiberaSolpe zsdLiberaSolpe = new ZsdLiberaSolpe();
+              zsdLiberaSolpe.Mandante = reader.GetString(0);
+              zsdLiberaSolpe.Tipo_Doc = reader.GetString(1);
+              zsdLiberaSolpe.Numero = reader.GetString(2);
+              zsdLiberaSolpe.Posicion = reader.GetInt32(3);
+              zsdLiberaSolpe.Texto = reader.GetString(4);
+              zsdLiberaSolpe.Cantidad = reader.GetDecimal(5);
+              zsdLiberaSolpe.Valor = reader.GetDecimal(6);
+              zsdLiberaSolpe.Usuario = reader.GetString(7);
+              zsdLiberaSolpe.Estado = reader.GetString(8).ToString();
+              result.Add(zsdLiberaSolpe);
+            }
+          else
+            while (reader.Read())
+            {
+              ZsdLiberaSolpe zsdLiberaSolpe = new ZsdLiberaSolpe();
 
-          while (reader.Read())
-          {
-            ZsdLiberaSolpe zsdLiberaSolpe = new ZsdLiberaSolpe();
-            zsdLiberaSolpe.Mandante = reader.GetString(0);
-            zsdLiberaSolpe.Tipo_Doc = reader.GetString(1);
-            zsdLiberaSolpe.Usuario = reader.GetString(2);
-            zsdLiberaSolpe.Numero = reader.GetString(3);
-            zsdLiberaSolpe.Posicion = reader.GetInt32(4);
-            zsdLiberaSolpe.Texto = reader.GetString(5);
-            zsdLiberaSolpe.Cantidad = reader.GetDecimal(6);
-            zsdLiberaSolpe.Valor = reader.GetDecimal(7);
-            zsdLiberaSolpe.Estado = reader.GetString(8).ToString();
-            result.Add(zsdLiberaSolpe);
-          }
-
+              zsdLiberaSolpe.Usuario = reader.GetString(0);
+              zsdLiberaSolpe.Access_Token = reader.GetString(1).ToString();
+              result.Add(zsdLiberaSolpe);
+            }
           reader.Dispose();
 
         }
@@ -223,7 +240,7 @@ namespace RCN.Solpe.DataBase.Core.Services
 
     }
 
-    private int CreateSolpeAccessUser(string userName, string platform, string accessToken)
+    private int CreateSolpeAccessUser(string userName, string platform, string accessToken, string iosToken = "")
     {
       int rowCount = 0;
       string conString = GetOracleConnectionParameters();
@@ -233,21 +250,23 @@ namespace RCN.Solpe.DataBase.Core.Services
         try
         {
           con.Open();
-          string sqlupdate = "insert into ZSD_SOLPE_ACCESS_USERS (USERNAME,ACCESS_TOKEN,PLATFORM) values(:userName,:accesstoken,:platform)";
+          string sqlupdate = "insert into ZSD_SOLPE_ACCESS_USERS (USERNAME,ACCESS_TOKEN,PLATFORM,IOS_TOKEN) values(:userName,:accesstoken,:platform,:ios_token)";
           oraUpdate = new OracleCommand(sqlupdate, con);
 
-          OracleParameter OraParamAccessToken = new OracleParameter(":accesstoken", OracleDbType.Varchar2, 300);
+          OracleParameter OraParamAccessToken = new OracleParameter(":accesstoken", OracleDbType.Varchar2, 500);
           OracleParameter OraParamUserName = new OracleParameter(":userName", OracleDbType.Varchar2, 100);  //Ajout
           OracleParameter OraParamPlatform = new OracleParameter(":platform", OracleDbType.Varchar2, 10);
+          OracleParameter OraParamIosToken = new OracleParameter(":ios_token", OracleDbType.Varchar2, 500);
 
           OraParamAccessToken.Value = accessToken;
           OraParamUserName.Value = userName;
           OraParamPlatform.Value = platform;
-
+          OraParamIosToken.Value = iosToken;
 
           oraUpdate.Parameters.Add(OraParamUserName);
           oraUpdate.Parameters.Add(OraParamAccessToken);
           oraUpdate.Parameters.Add(OraParamPlatform);
+          oraUpdate.Parameters.Add(OraParamIosToken);
 
           rowCount = oraUpdate.ExecuteNonQuery();
 
@@ -286,7 +305,7 @@ namespace RCN.Solpe.DataBase.Core.Services
     {
       var requestBody = new TokenRequest();
       requestBody.application = "org.nativescript.solpercn";
-      requestBody.sandbox = true;
+      requestBody.sandbox = false;
       requestBody.apns_tokens = new List<string>();
       requestBody.apns_tokens.Add(accessToken);
 
@@ -314,9 +333,47 @@ namespace RCN.Solpe.DataBase.Core.Services
       }
     }
 
-    public Task<bool> SendNotifications()
+    public async Task<bool> SendNotifications()
     {
-      throw new NotImplementedException();
+      // llama el servicio que retorna las solpes en estado E
+      List<ZsdLiberaSolpe> listresult = await GetLiberaSolpes();
+      List<string> notificationResult = new List<string>();
+      var requestBody = new NotificationModel();
+      requestBody.registration_ids = new List<string>();
+
+      foreach (var item in listresult)
+      {
+        requestBody.registration_ids.Add(item.Access_Token);
+
+      }
+      requestBody.notification = new Notification();
+      requestBody.notification.badge = 1;
+      requestBody.notification.tittle = "Notificación de pedidos.SOLPE";
+      requestBody.notification.category = "GENERAL";
+      requestBody.notification.showWhenInForeground = true;
+      requestBody.image = "https://firebase.google.com/images/social.png";
+      requestBody.sound = "default";
+
+
+      var client = new RestClient("https://fcm.googleapis.com/fcm/send");
+      var request = new RestRequest(Method.POST);
+      request.AddHeader("postman-token", "f57e37d9-1492-e9da-943a-d7773f9b3551");
+      request.AddHeader("cache-control", "no-cache");
+      request.AddHeader("authorization", "key=AIzaSyC7UkSrfU-qgMT5O3K14jdj-kz5Gzbzfv4");
+      request.AddHeader("content-type", "application/json");
+
+      string output = JsonConvert.SerializeObject(requestBody);
+
+      request.AddParameter("application/json", output, ParameterType.RequestBody);
+      IRestResponse response = client.Execute(request);
+
+      if (response.StatusCode != System.Net.HttpStatusCode.OK)
+      {
+        throw new Exception("Error generando el token de accesso. Comunicarse con el administrador ");
+      }
+
+      return true;
     }
+
   }
 }

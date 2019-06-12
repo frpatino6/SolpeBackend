@@ -11,5 +11,7 @@
     public decimal Cantidad { get; set; }
     public decimal Valor { get; set; }
     public string Estado { get; set; }
+    public string Email { get; set; }
+    public string Access_Token { get; set; }
   }
 }
