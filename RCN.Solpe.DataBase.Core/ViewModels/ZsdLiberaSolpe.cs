@@ -13,5 +13,7 @@
     public string Estado { get; set; }
     public string Email { get; set; }
     public string Access_Token { get; set; }
+
+    public int CountSolpes { get; set; }
   }
 }

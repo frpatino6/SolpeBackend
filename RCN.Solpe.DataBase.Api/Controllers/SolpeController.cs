@@ -78,7 +78,7 @@ namespace RCN.Solpe.Api.Controllers
     {
       try
       {
-        var result = _ISolpeServices.UpdateSolpe(Convert.ToInt32(number));
+        var result = _ISolpeServices.UpdateSolpe(number);
         //var result = _IADIntegrationRepository.DeleteUser("", "");
         return Ok(result);
       }

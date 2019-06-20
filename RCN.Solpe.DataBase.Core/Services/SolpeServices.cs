@@ -14,7 +14,7 @@ namespace RCN.Solpe.DataBase.Core.Services
   public class SolpeServices : ISolpeServices
   {
     private readonly IConfiguration _IConfiguration;
-
+    private int countRecords = 0;
     public SolpeServices(IConfiguration configuration)
     {
       _IConfiguration = configuration;
@@ -48,7 +48,7 @@ namespace RCN.Solpe.DataBase.Core.Services
 
           OracleParameter pUserName = new OracleParameter();
           pUserName.DbType = DbType.String;
-          pUserName.Value = userName;
+          pUserName.Value = userName.ToUpper();
           pUserName.ParameterName = "userName";
           cmd.Parameters.Add(pUserName);
 
@@ -69,7 +69,7 @@ namespace RCN.Solpe.DataBase.Core.Services
           {
             _zsd_Solpe_Access_Users = new Zsd_Solpe_Access_Users();
             _zsd_Solpe_Access_Users.Id = reader.GetInt32(0);
-            _zsd_Solpe_Access_Users.UserName = reader.GetString(1);
+            _zsd_Solpe_Access_Users.UserName = reader.GetString(1).ToUpper();
             _zsd_Solpe_Access_Users.AccessToken = reader.GetString(2);
             _zsd_Solpe_Access_Users.Platform = reader.GetString(3);
 
@@ -110,19 +110,20 @@ namespace RCN.Solpe.DataBase.Core.Services
 
           OracleParameter pPlayerNum = new OracleParameter();
           pPlayerNum.DbType = DbType.String;
-          pPlayerNum.Value = userName;
+          pPlayerNum.Value = userName.ToUpper();
           pPlayerNum.ParameterName = "nombre";
           cmd.Parameters.Add(pPlayerNum);
 
           if (!string.IsNullOrEmpty(userName))
-            cmd.CommandText = "select * from ZSD_LIBERA_SOLPE  where usuario=:nombre and estado!='E'";
+            cmd.CommandText = "select * from ZSD_LIBERA_SOLPE  where UPPER(usuario)=:nombre and estado!='N' AND  estado!='A'";
           else
-            cmd.CommandText = @"select s.usuario,u.access_token  from zsd_libera_solpe s
-                                inner join zsd_solpe_access_users u on s.usuario=u.username
-                                where   s.estado IS NULL
-                                group by s.usuario,u.access_token";
+            cmd.CommandText = @"select s.usuario,u.access_token ,numero from zsd_libera_solpe s
+                                inner join zsd_solpe_access_users u on UPPER(s.usuario)=UPPER(u.username)
+                                where   s.estado != 'N'
+                                group by S.NUMERO,s.usuario,u.access_token";
 
           OracleDataReader reader = cmd.ExecuteReader();
+          countRecords = 0;
 
           if (!string.IsNullOrEmpty(userName))
             while (reader.Read())
@@ -146,8 +147,10 @@ namespace RCN.Solpe.DataBase.Core.Services
 
               zsdLiberaSolpe.Usuario = reader.GetString(0);
               zsdLiberaSolpe.Access_Token = reader.GetString(1).ToString();
+              countRecords += 1;
               result.Add(zsdLiberaSolpe);
             }
+          
           reader.Dispose();
 
         }
@@ -207,8 +210,13 @@ namespace RCN.Solpe.DataBase.Core.Services
       return rowCount;
     }
 
+    /// <summary>
+    /// Crea histórico de los pedidos notificados por usuario
+    /// </summary>
+    private void SetSolpeNotification(string user, string numero) {
+    }
 
-    public async Task<int> UpdateSolpe(int number)
+    public async Task<int> UpdateSolpe(string number)
     {
       int rowCount = 0;
       string conString = GetOracleConnectionParameters();
@@ -220,7 +228,7 @@ namespace RCN.Solpe.DataBase.Core.Services
           {
             con.Open();
 
-            cmd.CommandText = "update  ZSD_LIBERA_SOLPE set estado ='E' where numero=:numero ";
+            cmd.CommandText = "update  ZSD_LIBERA_SOLPE set estado ='N' where numero=:numero ";
             OracleParameter pPlayerNum = new OracleParameter();
             pPlayerNum.DbType = DbType.String;
             pPlayerNum.Value = number;
@@ -254,12 +262,12 @@ namespace RCN.Solpe.DataBase.Core.Services
           oraUpdate = new OracleCommand(sqlupdate, con);
 
           OracleParameter OraParamAccessToken = new OracleParameter(":accesstoken", OracleDbType.Varchar2, 500);
-          OracleParameter OraParamUserName = new OracleParameter(":userName", OracleDbType.Varchar2, 100);  //Ajout
+          OracleParameter OraParamUserName = new OracleParameter(":userName", OracleDbType.Varchar2, 100);
           OracleParameter OraParamPlatform = new OracleParameter(":platform", OracleDbType.Varchar2, 10);
           OracleParameter OraParamIosToken = new OracleParameter(":ios_token", OracleDbType.Varchar2, 500);
 
           OraParamAccessToken.Value = accessToken;
-          OraParamUserName.Value = userName;
+          OraParamUserName.Value = userName.ToUpper();
           OraParamPlatform.Value = platform;
           OraParamIosToken.Value = iosToken;
 
@@ -272,9 +280,9 @@ namespace RCN.Solpe.DataBase.Core.Services
 
 
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
+          throw new Exception(ex.Message);
         }
         finally
         {
@@ -338,40 +346,47 @@ namespace RCN.Solpe.DataBase.Core.Services
       // llama el servicio que retorna las solpes en estado E
       List<ZsdLiberaSolpe> listresult = await GetLiberaSolpes();
       List<string> notificationResult = new List<string>();
-      var requestBody = new NotificationModel();
-      requestBody.registration_ids = new List<string>();
+      
+     
 
-      foreach (var item in listresult)
+      foreach (var item in listresult) 
       {
+        var requestBody = new NotificationModel();
+        requestBody.registration_ids = new List<string>();
         requestBody.registration_ids.Add(item.Access_Token);
+        requestBody.notification = new Notification();
+        requestBody.notification.badge = countRecords;
+        requestBody.notification.tittle = "Notificación de pedidos SOLPE";
+        requestBody.notification.text = "Ha sido enviada un solicitud-pedido a su nombre";
+        requestBody.notification.category = "GENERAL";
+        requestBody.notification.showWhenInForeground = true;
+        requestBody.image = "https://firebase.google.com/images/social.png";
+        requestBody.sound = "default";
+
+
+        var client = new RestClient("https://fcm.googleapis.com/fcm/send");
+        var request = new RestRequest(Method.POST);
+        request.AddHeader("postman-token", "f57e37d9-1492-e9da-943a-d7773f9b3551");
+        request.AddHeader("cache-control", "no-cache");
+        request.AddHeader("authorization", "key=AIzaSyC7UkSrfU-qgMT5O3K14jdj-kz5Gzbzfv4");
+        request.AddHeader("content-type", "application/json");
+
+        string output = JsonConvert.SerializeObject(requestBody);
+
+        request.AddParameter("application/json", output, ParameterType.RequestBody);
+        IRestResponse response = client.Execute(request);
+
+        if (response.StatusCode != System.Net.HttpStatusCode.OK)
+        {
+          throw new Exception("Error enviando notificaciones. Comunicarse con el administrador " + response.ErrorMessage);
+        }
 
       }
-      requestBody.notification = new Notification();
-      requestBody.notification.badge = 1;
-      requestBody.notification.tittle = "Notificación de pedidos.SOLPE";
-      requestBody.notification.category = "GENERAL";
-      requestBody.notification.showWhenInForeground = true;
-      requestBody.image = "https://firebase.google.com/images/social.png";
-      requestBody.sound = "default";
 
-
-      var client = new RestClient("https://fcm.googleapis.com/fcm/send");
-      var request = new RestRequest(Method.POST);
-      request.AddHeader("postman-token", "f57e37d9-1492-e9da-943a-d7773f9b3551");
-      request.AddHeader("cache-control", "no-cache");
-      request.AddHeader("authorization", "key=AIzaSyC7UkSrfU-qgMT5O3K14jdj-kz5Gzbzfv4");
-      request.AddHeader("content-type", "application/json");
-
-      string output = JsonConvert.SerializeObject(requestBody);
-
-      request.AddParameter("application/json", output, ParameterType.RequestBody);
-      IRestResponse response = client.Execute(request);
-
-      if (response.StatusCode != System.Net.HttpStatusCode.OK)
+      if (listresult.Count > 0)
       {
-        throw new Exception("Error generando el token de accesso. Comunicarse con el administrador ");
+        
       }
-
       return true;
     }
 

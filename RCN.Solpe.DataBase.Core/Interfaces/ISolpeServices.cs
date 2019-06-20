@@ -10,7 +10,7 @@ namespace RCN.Solpe.DataBase.Core.Interfaces
   {
     Task<List<ZsdLiberaSolpe>> GetLiberaSolpes(string userName);
 
-    Task<int> UpdateSolpe(int number);
+    Task<int> UpdateSolpe(string number);
 
     Task<int> SetAccessToken(string userName, string accessToken, string platform);
 

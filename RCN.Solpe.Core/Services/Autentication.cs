@@ -41,7 +41,7 @@ namespace RCN.Solpe.Core.Services
           GetSolpeAccess(userName, accesstoken, platform);
         }
         else {
-          throw new Exception("Nombre de usuario y contrasña no válido");
+          throw new Exception("Nombre de usuario y contraseña no válido");
         }
         return result;
 
