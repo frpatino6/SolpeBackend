@@ -114,14 +114,22 @@ namespace RCN.Solpe.DataBase.Core.Services
           pPlayerNum.ParameterName = "nombre";
           cmd.Parameters.Add(pPlayerNum);
 
-          if (!string.IsNullOrEmpty(userName))
-            cmd.CommandText = "select * from ZSD_LIBERA_SOLPE  where UPPER(usuario)=:nombre and estado!='N' AND  estado!='A'";
-          else
-            cmd.CommandText = @"select s.usuario,u.access_token ,numero from zsd_libera_solpe s
-                                inner join zsd_solpe_access_users u on UPPER(s.usuario)=UPPER(u.username)
-                                where   s.estado != 'N'
-                                group by S.NUMERO,s.usuario,u.access_token";
 
+          OracleParameter estado = new OracleParameter();
+          estado.DbType = DbType.String;
+          estado.Value = "E";
+          estado.ParameterName = "estado";
+          cmd.Parameters.Add(estado);
+
+          if (!string.IsNullOrEmpty(userName))
+            cmd.CommandText = "select * from ZSD_LIBERA_SOLPE where UPPER(usuario)=:nombre and estado='I'";
+          else
+            cmd.CommandText = $@"select s.usuario,u.access_token ,COUNT(numero) from ZSD_SOLPE_NOTIFICADOS s 
+                              inner join zsd_solpe_access_users u on UPPER(s.usuario)=UPPER(u.username) 
+                              where  estado='I'
+                              group by s.usuario,u.access_token";
+
+          //and TRUNC(u.ULTIMA_NOTIFICACION) = TO_DATE('{DateTime.Now}','dd/mon/yyyy')
           OracleDataReader reader = cmd.ExecuteReader();
           countRecords = 0;
 
@@ -147,10 +155,10 @@ namespace RCN.Solpe.DataBase.Core.Services
 
               zsdLiberaSolpe.Usuario = reader.GetString(0);
               zsdLiberaSolpe.Access_Token = reader.GetString(1).ToString();
-              countRecords += 1;
+              zsdLiberaSolpe.Numero = reader.GetInt32(2).ToString();
               result.Add(zsdLiberaSolpe);
             }
-          
+
           reader.Dispose();
 
         }
@@ -213,7 +221,8 @@ namespace RCN.Solpe.DataBase.Core.Services
     /// <summary>
     /// Crea histórico de los pedidos notificados por usuario
     /// </summary>
-    private void SetSolpeNotification(string user, string numero) {
+    private void SetSolpeNotification(string user, string numero)
+    {
     }
 
     public async Task<int> UpdateSolpe(string number)
@@ -241,6 +250,43 @@ namespace RCN.Solpe.DataBase.Core.Services
           catch (Exception)
           {
 
+          }
+        }
+      }
+      return rowCount;
+
+    }
+
+    /// <summary>
+    /// Cambia el estado de un pedido a N cuando el evio de la notificación fue correcto
+    /// </summary>
+    /// <param name="number"></param>
+    /// <returns></returns>
+    public async Task<int> UpdateSolpeNotificationState(string usuario)
+    {
+      int rowCount = 0;
+      string conString = GetOracleConnectionParameters();
+      using (OracleConnection con = new OracleConnection(conString))
+      {
+        using (OracleCommand cmd = con.CreateCommand())
+        {
+          try
+          {
+            con.Open();
+
+            cmd.CommandText = "update  ZSD_SOLPE_NOTIFICADOS set estado ='E' where usuario=:usuario ";
+            OracleParameter pPlayerNum = new OracleParameter();
+            pPlayerNum.DbType = DbType.String;
+            pPlayerNum.Value = usuario;
+            pPlayerNum.ParameterName = "usuario";
+            cmd.Parameters.Add(pPlayerNum);
+            // Execute Command (for Delete, Insert,Update).
+            rowCount = cmd.ExecuteNonQuery();
+
+          }
+          catch (Exception ex)
+          {
+            throw new Exception(ex.Message);
           }
         }
       }
@@ -346,16 +392,16 @@ namespace RCN.Solpe.DataBase.Core.Services
       // llama el servicio que retorna las solpes en estado E
       List<ZsdLiberaSolpe> listresult = await GetLiberaSolpes();
       List<string> notificationResult = new List<string>();
-      
-     
+      NotificationsResult res = new NotificationsResult();
 
-      foreach (var item in listresult) 
+
+      foreach (var item in listresult)
       {
         var requestBody = new NotificationModel();
         requestBody.registration_ids = new List<string>();
         requestBody.registration_ids.Add(item.Access_Token);
         requestBody.notification = new Notification();
-        requestBody.notification.badge = countRecords;
+        requestBody.notification.badge = Convert.ToInt16(item.Numero);
         requestBody.notification.tittle = "Notificación de pedidos SOLPE";
         requestBody.notification.text = "Ha sido enviada un solicitud-pedido a su nombre";
         requestBody.notification.category = "GENERAL";
@@ -380,13 +426,17 @@ namespace RCN.Solpe.DataBase.Core.Services
         {
           throw new Exception("Error enviando notificaciones. Comunicarse con el administrador " + response.ErrorMessage);
         }
+        else
+        {
+          res = JsonConvert.DeserializeObject<NotificationsResult>(response.Content);
 
+          if(res.failure==0)
+            await UpdateSolpeNotificationState(item.Usuario);
+        }
       }
 
-      if (listresult.Count > 0)
-      {
-        
-      }
+     
+
       return true;
     }
 
