@@ -225,7 +225,45 @@ namespace RCN.Solpe.DataBase.Core.Services
     {
     }
 
-    public async Task<int> UpdateSolpe(string number)
+    public async Task<int> UpdateSolpe(string number, int posicion)
+    {
+      int rowCount = 0;
+      string conString = GetOracleConnectionParameters();
+      using (OracleConnection con = new OracleConnection(conString))
+      {
+        using (OracleCommand cmd = con.CreateCommand())
+        {
+          try
+          {
+            con.Open();
+
+            cmd.CommandText = "update  ZSD_LIBERA_SOLPE set estado ='N' where numero=:numero and posicion=:posicion ";
+            OracleParameter numero = new OracleParameter();
+            numero.DbType = DbType.String;
+            numero.Value = number;
+            numero.ParameterName = "numero";
+            cmd.Parameters.Add(numero);
+
+            OracleParameter pos = new OracleParameter();
+            pos.DbType = DbType.Int32;
+            pos.Value = posicion;
+            pos.ParameterName = "posicion";
+            cmd.Parameters.Add(pos);
+            // Execute Command (for Delete, Insert,Update).
+            rowCount = cmd.ExecuteNonQuery();
+
+          }
+          catch (Exception)
+          {
+
+          }
+        }
+      }
+      return rowCount;
+
+    }
+
+    public async Task<int> UpdatePedido(string number)
     {
       int rowCount = 0;
       string conString = GetOracleConnectionParameters();
@@ -238,12 +276,12 @@ namespace RCN.Solpe.DataBase.Core.Services
             con.Open();
 
             cmd.CommandText = "update  ZSD_LIBERA_SOLPE set estado ='N' where numero=:numero ";
-            OracleParameter pPlayerNum = new OracleParameter();
-            pPlayerNum.DbType = DbType.String;
-            pPlayerNum.Value = number;
-            pPlayerNum.ParameterName = "numero";
-            cmd.Parameters.Add(pPlayerNum);
-            // Execute Command (for Delete, Insert,Update).
+            OracleParameter numero = new OracleParameter();
+            numero.DbType = DbType.String;
+            numero.Value = number;
+            numero.ParameterName = "numero";
+            cmd.Parameters.Add(numero);
+          
             rowCount = cmd.ExecuteNonQuery();
 
           }

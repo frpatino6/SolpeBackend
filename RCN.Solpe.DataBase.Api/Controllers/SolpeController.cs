@@ -73,12 +73,28 @@ namespace RCN.Solpe.Api.Controllers
       }
     }
 
-    [HttpPost("/solpe/UpdateOrderState/{number}")]
-    public async Task<IActionResult> UpdateOrderState(string number)
+    [HttpPost("/solpe/UpdateSolpeState/{number}/{posicion}")]
+    public async Task<IActionResult> UpdateSolpeState(string number, int posicion)
     {
       try
       {
-        var result = _ISolpeServices.UpdateSolpe(number);
+        var result = _ISolpeServices.UpdateSolpe(number, posicion);
+        //var result = _IADIntegrationRepository.DeleteUser("", "");
+        return Ok(result);
+      }
+      catch (Exception ex)
+      {
+
+        return BadRequest(ex.Message);
+      }
+    }
+
+    [HttpPost("/solpe/UpdatePedidoState/{number}")]
+    public async Task<IActionResult> UpdatePedidoState(string number)
+    {
+      try
+      {
+        var result = _ISolpeServices.UpdatePedido(number);
         //var result = _IADIntegrationRepository.DeleteUser("", "");
         return Ok(result);
       }

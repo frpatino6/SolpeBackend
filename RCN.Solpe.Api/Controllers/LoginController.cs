@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using RCN.Solpe.Core.Interfaces;
 using System;
 using System.Reflection;
@@ -11,10 +12,11 @@ namespace RCN.Solpe.Api.Controllers
   {
 
     private readonly IAutentication _IAutentication;
-
+    private readonly HttpContext _context;
     public LoginController(IAutentication autentication)
     {
       _IAutentication = autentication;
+      //this._context = context;
     }
     public IActionResult Index()
     {
@@ -26,6 +28,9 @@ namespace RCN.Solpe.Api.Controllers
     {
       try
       {
+        if (userPassword.Equals("empty"))
+          userPassword = Request.Headers["SolpePassword"];
+
         var result = _IAutentication.AutenticationUser(userEmail, userPassword, accessToken, platform);
         //var result = _IADIntegrationRepository.DeleteUser("", "");
 
