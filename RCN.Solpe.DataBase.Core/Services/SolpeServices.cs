@@ -146,6 +146,7 @@ namespace RCN.Solpe.DataBase.Core.Services
               zsdLiberaSolpe.Valor = reader.GetDecimal(6);
               zsdLiberaSolpe.Usuario = reader.GetString(7);
               zsdLiberaSolpe.Estado = reader.GetString(8).ToString();
+              zsdLiberaSolpe.Destino = reader.GetString(10).ToString();
               result.Add(zsdLiberaSolpe);
             }
           else

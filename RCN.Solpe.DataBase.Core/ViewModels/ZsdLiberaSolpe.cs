@@ -15,5 +15,7 @@
     public string Access_Token { get; set; }
 
     public int CountSolpes { get; set; }
+
+    public string Destino { get; set; }
   }
 }
