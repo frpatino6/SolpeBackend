@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using RCN.Solpe.DataBase.Core.Interfaces;
 using System;
 using System.Reflection;
@@ -11,10 +12,11 @@ namespace RCN.Solpe.Api.Controllers
   {
 
     private readonly ISolpeServices _ISolpeServices;
-
-    public SolpeController(ISolpeServices solpeServices)
+    private readonly ILogger<SolpeController> _logger;
+    public SolpeController(ISolpeServices solpeServices, ILogger<SolpeController> logger)
     {
       _ISolpeServices = solpeServices;
+      _logger = logger;
     }
     public IActionResult Index()
     {

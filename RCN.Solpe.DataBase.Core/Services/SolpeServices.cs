@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Oracle.ManagedDataAccess.Client;
 using RCN.Solpe.DataBase.Core.Interfaces;
@@ -14,10 +15,13 @@ namespace RCN.Solpe.DataBase.Core.Services
   public class SolpeServices : ISolpeServices
   {
     private readonly IConfiguration _IConfiguration;
+    private readonly ILogger<SolpeServices> _logger;
+
     private int countRecords = 0;
-    public SolpeServices(IConfiguration configuration)
+    public SolpeServices(IConfiguration configuration, ILogger<SolpeServices> logger)
     {
       _IConfiguration = configuration;
+      _logger = logger;
     }
 
 
@@ -97,7 +101,7 @@ namespace RCN.Solpe.DataBase.Core.Services
     public async Task<List<ZsdLiberaSolpe>> GetLiberaSolpes(string userName = "")
     {
       string conString = GetOracleConnectionParameters();
-
+      _logger.LogInformation("Iniciando GetLiberaSolpes para " + userName.ToUpper());
 
       List<ZsdLiberaSolpe> result = new List<ZsdLiberaSolpe>();
       using (OracleConnection con = new OracleConnection(conString))
@@ -122,15 +126,22 @@ namespace RCN.Solpe.DataBase.Core.Services
           cmd.Parameters.Add(estado);
 
           if (!string.IsNullOrEmpty(userName))
+          {
+            _logger.LogInformation("Consultando solpes por usuario " + userName.ToUpper());
             cmd.CommandText = "select * from ZSD_LIBERA_SOLPE where UPPER(usuario)=:nombre and estado='I'";
+          }
           else
+          {
+            _logger.LogInformation("Consultando solpes para todos en estado I ");
             cmd.CommandText = $@"select s.usuario,u.access_token ,COUNT(numero) from ZSD_SOLPE_NOTIFICADOS s 
                               inner join zsd_solpe_access_users u on UPPER(s.usuario)=UPPER(u.username) 
                               where  estado='I'
                               group by s.usuario,u.access_token";
+          }
 
           //and TRUNC(u.ULTIMA_NOTIFICACION) = TO_DATE('{DateTime.Now}','dd/mon/yyyy')
           OracleDataReader reader = cmd.ExecuteReader();
+          _logger.LogInformation("GetLiberaSolpes ejecutado satisfactóriamente ");
           countRecords = 0;
 
           if (!string.IsNullOrEmpty(userName))
@@ -159,11 +170,13 @@ namespace RCN.Solpe.DataBase.Core.Services
               zsdLiberaSolpe.Numero = reader.GetInt32(2).ToString();
               result.Add(zsdLiberaSolpe);
             }
-
           reader.Dispose();
-
         }
       }
+      if (result.Count > 0)
+        _logger.LogInformation("Solpes encontradas " + result.Count);
+      else
+        _logger.LogInformation("No se encontraron registros ");
 
       return result;
     }
@@ -252,11 +265,12 @@ namespace RCN.Solpe.DataBase.Core.Services
             cmd.Parameters.Add(pos);
             // Execute Command (for Delete, Insert,Update).
             rowCount = cmd.ExecuteNonQuery();
+            _logger.LogInformation("UpdateSolpe correctamente " + rowCount);
 
           }
-          catch (Exception)
+          catch (Exception ex)
           {
-
+            _logger.LogError("Error en servicio ==>UpdateSolpe" + ex.Message);
           }
         }
       }
@@ -282,13 +296,14 @@ namespace RCN.Solpe.DataBase.Core.Services
             numero.Value = number;
             numero.ParameterName = "numero";
             cmd.Parameters.Add(numero);
-          
+
             rowCount = cmd.ExecuteNonQuery();
+            _logger.LogInformation("UpdatePedido correctamente " + rowCount);
 
           }
-          catch (Exception)
+          catch (Exception ex)
           {
-
+            _logger.LogError("Error en servicio ==>UpdatePedido" + ex.Message);
           }
         }
       }
@@ -304,6 +319,8 @@ namespace RCN.Solpe.DataBase.Core.Services
     public async Task<int> UpdateSolpeNotificationState(string usuario)
     {
       int rowCount = 0;
+      _logger.LogInformation("iniciando  UpdateSolpeNotificationState");
+
       string conString = GetOracleConnectionParameters();
       using (OracleConnection con = new OracleConnection(conString))
       {
@@ -321,10 +338,12 @@ namespace RCN.Solpe.DataBase.Core.Services
             cmd.Parameters.Add(pPlayerNum);
             // Execute Command (for Delete, Insert,Update).
             rowCount = cmd.ExecuteNonQuery();
+            _logger.LogInformation(" ZSD_SOLPE_NOTIFICADOS set estado ='E'");
 
           }
           catch (Exception ex)
           {
+            _logger.LogError("Error en servicio ==>UpdateSolpeNotificationState" + ex.Message);
             throw new Exception(ex.Message);
           }
         }
@@ -362,11 +381,13 @@ namespace RCN.Solpe.DataBase.Core.Services
           oraUpdate.Parameters.Add(OraParamIosToken);
 
           rowCount = oraUpdate.ExecuteNonQuery();
-
+          _logger.LogInformation("CreateSolpeAccessUser ejecutado con éxito " + rowCount);
 
         }
         catch (Exception ex)
         {
+
+          _logger.LogError("Error en servicio ==>CreateSolpeAccessUser" + ex.Message);
           throw new Exception(ex.Message);
         }
         finally
@@ -419,9 +440,13 @@ namespace RCN.Solpe.DataBase.Core.Services
                       PreserveReferencesHandling = PreserveReferencesHandling.Objects
                     });
       if (result != null && result.Results.Count > 0)
+      {
+        _logger.LogInformation("GenerateIosAccessToken ejecutado con éxito " + result.Results[0].registration_token);
         return result.Results[0].registration_token;
+      }
       else
       {
+        _logger.LogInformation("Error generando el token de accesso");
         throw new Exception("Error generando el token de accesso. Comunicarse con el administrador ");
       }
     }
@@ -458,23 +483,26 @@ namespace RCN.Solpe.DataBase.Core.Services
 
         string output = JsonConvert.SerializeObject(requestBody);
 
+        _logger.LogInformation("Respuesta solicitud http de notificación" + output);
+
         request.AddParameter("application/json", output, ParameterType.RequestBody);
         IRestResponse response = client.Execute(request);
 
         if (response.StatusCode != System.Net.HttpStatusCode.OK)
         {
+          _logger.LogError("Error enviando notificaciones " + response.ErrorMessage);
           throw new Exception("Error enviando notificaciones. Comunicarse con el administrador " + response.ErrorMessage);
         }
         else
         {
           res = JsonConvert.DeserializeObject<NotificationsResult>(response.Content);
-
-          if(res.failure==0)
+          _logger.LogInformation("Notificación enviada con éxito " + output);
+          if (res.failure == 0)
             await UpdateSolpeNotificationState(item.Usuario);
         }
       }
 
-     
+
 
       return true;
     }

@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using RCN.Solpe.Core.Interfaces;
 using RCN.Solpe.Core.Services;
-
+using Serilog;
 
 namespace RCN.Solpe.Api
 {
@@ -14,6 +15,7 @@ namespace RCN.Solpe.Api
     public Startup(IConfiguration configuration)
     {
       Configuration = configuration;
+      Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration).CreateLogger();
     }
 
     public IConfiguration Configuration { get; }
@@ -26,8 +28,9 @@ namespace RCN.Solpe.Api
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+    public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
     {
+      loggerFactory.AddSerilog();
       if (env.IsDevelopment())
       {
         app.UseDeveloperExceptionPage();

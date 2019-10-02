@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using RCN.Solpe.Core.Interfaces;
 using System;
 using System.Reflection;
@@ -11,10 +12,12 @@ namespace RCN.Solpe.Api.Controllers
   {
 
     private readonly IAutentication _IAutentication;
+    private readonly ILogger<ActiveDirectoryController> _logger;
 
-    public ActiveDirectoryController(IAutentication  autentication)
+    public ActiveDirectoryController(IAutentication  autentication, ILogger<ActiveDirectoryController> logger)
     {
       _IAutentication = autentication;
+      _logger = logger;
     }
     public IActionResult Index()
     {

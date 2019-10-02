@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using RCN.Solpe.Core.Interfaces;
 using System;
 using System.Reflection;
@@ -12,10 +13,12 @@ namespace RCN.Solpe.Api.Controllers
   {
 
     private readonly IAutentication _IAutentication;
+    private readonly  ILogger<LoginController> _logger;
     private readonly HttpContext _context;
-    public LoginController(IAutentication autentication)
+    public LoginController(IAutentication autentication, ILogger<LoginController> logger)
     {
       _IAutentication = autentication;
+      _logger = logger;
       //this._context = context;
     }
     public IActionResult Index()
@@ -41,7 +44,7 @@ namespace RCN.Solpe.Api.Controllers
       }
       catch (Exception ex)
       {
-
+        _logger.LogError(ex.Message);
         return BadRequest(ex.Message);
       }
     }

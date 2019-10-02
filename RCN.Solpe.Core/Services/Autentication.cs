@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using RCN.Solpe.Core.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -10,12 +11,13 @@ namespace RCN.Solpe.Core.Services
   public class Autentication : IAutentication
   {
     private readonly IConfiguration _IConfiguration;
+    private readonly ILogger<Autentication> _logger;
     private string sDefaultOU;
     private string passwordAdmin;
     private string userNameAdmin;
     private string sDomain;
     private string BaseOracleIntegrationUrl;
-    public Autentication(IConfiguration iConfiguration)
+    public Autentication(IConfiguration iConfiguration, ILogger<Autentication> logger)
     {
       _IConfiguration = iConfiguration;
       sDefaultOU = _IConfiguration.GetSection("DomainConfigFS").GetSection("sDefaultOU").Value;
@@ -23,6 +25,7 @@ namespace RCN.Solpe.Core.Services
       userNameAdmin = _IConfiguration.GetSection("DomainConfigFS").GetSection("userNameAdmin").Value;
       sDomain = _IConfiguration.GetSection("DomainConfigFS").GetSection("sDomain").Value;
       BaseOracleIntegrationUrl = _IConfiguration.GetSection("OracleIntegration").GetSection("url").Value;
+      _logger = logger;
     }
 
     /// <summary>
@@ -33,6 +36,7 @@ namespace RCN.Solpe.Core.Services
     /// <returns></returns>
     public bool AutenticationUser(string userName, string password, string accesstoken, string platform)
     {
+      _logger.LogInformation($"Autenticando {userName} {accesstoken} {platform}");
       using (var ctx = new PrincipalContext(ContextType.Domain, sDomain, userName, password))
       {
         var result = ctx.ValidateCredentials(userName, password);//Valida el usuario y pws
@@ -41,10 +45,10 @@ namespace RCN.Solpe.Core.Services
           GetSolpeAccess(userName, accesstoken, platform);
         }
         else {
+          _logger.LogWarning("Nombre de usuario y contraseña no válido");
           throw new Exception("Nombre de usuario y contraseña no válido");
         }
         return result;
-
       }
     }
 
