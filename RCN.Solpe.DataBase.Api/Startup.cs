@@ -44,10 +44,7 @@ namespace RCN.Solpe.DataBase.Api
       }
 
       app.UseMvc();
-
-     
-
-
+   
     }
   }
 }

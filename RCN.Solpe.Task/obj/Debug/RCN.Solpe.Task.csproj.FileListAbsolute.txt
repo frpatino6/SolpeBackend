@@ -1,0 +1,12 @@
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Task\bin\Debug\RCN.Solpe.Task.exe.config
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Task\bin\Debug\RCN.Solpe.Task.exe.manifest
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Task\bin\Debug\RCN.Solpe.Task.application
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Task\bin\Debug\RCN.Solpe.Task.exe
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Task\bin\Debug\RCN.Solpe.Task.pdb
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Task\obj\Debug\RCN.Solpe.Task.ProjectInstaller.resources
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Task\obj\Debug\RCN.Solpe.Task.SolpeService.resources
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Task\obj\Debug\RCN.Solpe.Task.csproj.GenerateResource.cache
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Task\obj\Debug\RCN.Solpe.Task.exe.manifest
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Task\obj\Debug\RCN.Solpe.Task.application
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Task\obj\Debug\RCN.Solpe.Task.exe
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Task\obj\Debug\RCN.Solpe.Task.pdb

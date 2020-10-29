@@ -1,0 +1,8 @@
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Core\bin\Release\netcoreapp2.2\RCN.Solpe.DataBase.Core.deps.json
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Core\bin\Release\netcoreapp2.2\RCN.Solpe.DataBase.Core.dll
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Core\bin\Release\netcoreapp2.2\RCN.Solpe.DataBase.Core.pdb
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Core\obj\Release\netcoreapp2.2\RCN.Solpe.DataBase.Core.csprojAssemblyReference.cache
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Core\obj\Release\netcoreapp2.2\RCN.Solpe.DataBase.Core.AssemblyInfoInputs.cache
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Core\obj\Release\netcoreapp2.2\RCN.Solpe.DataBase.Core.AssemblyInfo.cs
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Core\obj\Release\netcoreapp2.2\RCN.Solpe.DataBase.Core.dll
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Core\obj\Release\netcoreapp2.2\RCN.Solpe.DataBase.Core.pdb

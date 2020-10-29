@@ -4,57 +4,61 @@ using System.Net.Http;
 
 namespace RCN.Solpe.Task.Services
 {
-  public class IntegrationService
-  {
-    private static IntegrationService instance;
-    private string BaseUrl = System.Configuration.ConfigurationSettings.AppSettings["urlADIntegrationServices"].ToString();
-
-
-    public static IntegrationService Instance
+    public class IntegrationService
     {
-      get
-      {
-        if (instance == null)
+        private static IntegrationService instance;
+       
+
+
+        public static IntegrationService Instance
         {
-          instance = new IntegrationService();
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new IntegrationService();
+                }
+                return instance;
+            }
         }
-        return instance;
-      }
-    }
 
-    public string SendNotifications(EventLog eventIntegration)
-    {
-
-      CallGetLiberaSolpe(eventIntegration);
-      return string.Empty;
-    }
-
-    private async void CallGetLiberaSolpe(EventLog eventIntegration)
-    {
-      //Formatea la fecha
-      var dateToExecute = DateTime.Now.ToString("yyyy-MM-dd");
-
-      //Construye la url para consultar sí hay usuarios a eliminar
-      var url = BaseUrl + "/solpe/SendNotifications/";
-
-      eventIntegration.WriteEntry("Calling: " + url);
-
-      using (HttpClient client = new HttpClient())
-      {
-        try
+        public string SendNotifications(EventLog eventIntegration, string baseUrl)
         {
-          //LLama el servicio GetSheduleTaskByExecution
-          HttpResponseMessage response = await client.GetAsync(url);
-          response.EnsureSuccessStatusCode();
-          string responseBody = await response.Content.ReadAsStringAsync();
 
-          eventIntegration.WriteEntry("resultado GetLiberaSolpes" + responseBody, EventLogEntryType.SuccessAudit);
+            CallGetLiberaSolpeRcn(eventIntegration, baseUrl);
+            return string.Empty;
         }
-        catch(Exception ex)
+
+        private async void CallGetLiberaSolpeRcn(EventLog eventIntegration, string baseUrl)
         {
-          eventIntegration.WriteEntry(ex.Message, EventLogEntryType.Error);
+            if (string.IsNullOrEmpty(baseUrl))
+            {
+                throw new ArgumentException("No se ha ingresado valor para el destino de las notificaciones", nameof(baseUrl));
+            }
+            //Formatea la fecha
+            var dateToExecute = DateTime.Now.ToString("yyyy-MM-dd");
+
+            //Construye la url para consultar sí hay usuarios a eliminar
+            string url = $"{baseUrl}/solpe/SendNotifications/";
+
+            eventIntegration.WriteEntry("Calling: " + url);
+
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    //LLama el servicio GetSheduleTaskByExecution
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    response.EnsureSuccessStatusCode();
+                    string responseBody = await response.Content.ReadAsStringAsync();
+
+                    eventIntegration.WriteEntry("resultado GetLiberaSolpes" + responseBody, EventLogEntryType.SuccessAudit);
+                }
+                catch (Exception ex)
+                {
+                    eventIntegration.WriteEntry(ex.Message, EventLogEntryType.Error);
+                }
+            }
         }
-      }
     }
-  }
 }
