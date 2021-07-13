@@ -4,6 +4,6 @@ E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Core\bin\Debug\netcoreapp2.2\RCN.Solpe.Core.
 E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Core\obj\Debug\netcoreapp2.2\RCN.Solpe.Core.csprojAssemblyReference.cache
 E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Core\obj\Debug\netcoreapp2.2\RCN.Solpe.Core.AssemblyInfoInputs.cache
 E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Core\obj\Debug\netcoreapp2.2\RCN.Solpe.Core.AssemblyInfo.cs
+E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Core\obj\Debug\netcoreapp2.2\RCN.Solpe.Core.csproj.CoreCompileInputs.cache
 E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Core\obj\Debug\netcoreapp2.2\RCN.Solpe.Core.dll
 E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Core\obj\Debug\netcoreapp2.2\RCN.Solpe.Core.pdb
-E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.Core\obj\Debug\netcoreapp2.2\RCN.Solpe.Core.csproj.CoreCompileInputs.cache

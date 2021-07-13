@@ -1,7 +1,6 @@
 E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Api\bin\Debug\netcoreapp2.2\web.config
 E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Api\bin\Debug\netcoreapp2.2\appsettings.Development.json
 E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Api\bin\Debug\netcoreapp2.2\appsettings.json
-E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Api\bin\Debug\netcoreapp2.2\Properties\launchSettings.json
 E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Api\bin\Debug\netcoreapp2.2\RCN.Solpe.DataBase.Api.deps.json
 E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Api\bin\Debug\netcoreapp2.2\RCN.Solpe.DataBase.Api.runtimeconfig.json
 E:\Rcn\Solpe\SolpeBackend\RCN.Solpe.DataBase.Api\bin\Debug\netcoreapp2.2\RCN.Solpe.DataBase.Api.runtimeconfig.dev.json

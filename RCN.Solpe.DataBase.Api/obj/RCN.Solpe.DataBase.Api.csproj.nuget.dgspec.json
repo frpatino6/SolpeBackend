@@ -14,11 +14,13 @@
         "outputPath": "E:\\Rcn\\Solpe\\SolpeBackend\\RCN.Solpe.DataBase.Api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Microsoft\\Xamarin\\NuGet\\",
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
+          "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
           "C:\\Users\\fernando\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
@@ -31,6 +33,7 @@
         },
         "frameworks": {
           "netcoreapp2.2": {
+            "targetAlias": "netcoreapp2.2",
             "projectReferences": {
               "E:\\Rcn\\Solpe\\SolpeBackend\\RCN.Solpe.DataBase.Core\\RCN.Solpe.DataBase.Core.csproj": {
                 "projectPath": "E:\\Rcn\\Solpe\\SolpeBackend\\RCN.Solpe.DataBase.Core\\RCN.Solpe.DataBase.Core.csproj"
@@ -46,6 +49,7 @@
       },
       "frameworks": {
         "netcoreapp2.2": {
+          "targetAlias": "netcoreapp2.2",
           "dependencies": {
             "Microsoft.AspNetCore.App": {
               "suppressParent": "All",
@@ -111,7 +115,7 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.301\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -125,11 +129,13 @@
         "outputPath": "E:\\Rcn\\Solpe\\SolpeBackend\\RCN.Solpe.DataBase.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Microsoft\\Xamarin\\NuGet\\",
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
+          "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
           "C:\\Users\\fernando\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
@@ -142,6 +148,7 @@
         },
         "frameworks": {
           "netcoreapp2.2": {
+            "targetAlias": "netcoreapp2.2",
             "projectReferences": {}
           }
         },
@@ -153,6 +160,7 @@
       },
       "frameworks": {
         "netcoreapp2.2": {
+          "targetAlias": "netcoreapp2.2",
           "dependencies": {
             "Microsoft.NETCore.App": {
               "suppressParent": "All",
@@ -215,7 +223,7 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.301\\RuntimeIdentifierGraph.json"
         }
       }
     }
